@@ -22,7 +22,7 @@ let db: Db | null = null;
 
 try {
   conn = await client.connect();
-  db = conn.db("sfmgr");
+  db = conn.db("ytmgr");
 } catch (e) {
   console.error(e);
 }

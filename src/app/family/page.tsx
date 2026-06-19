@@ -11,7 +11,7 @@ export async function generateMetadata({
   searchParams: Promise<{ code?: string }>;
 }): Promise<Metadata> {
   const defaultMetadata = {
-    title: "spotifam-manager",
+    title: "ytfam-manager",
     description: "Family overview page",
   };
   const code = (await searchParams).code;
@@ -38,12 +38,12 @@ export async function generateMetadata({
       title: `Family: ${family.name}`,
       description: `${family.members.length} members`,
       openGraph: {
-        siteName: `spotifam-manager`,
+        siteName: `ytfam-manager`,
         title: `Family: ${family.name}`,
         description: `${family.members.length} members`,
         images: [
           {
-            url: "https://sfmgr.userbyte.xyz/img/png/logo.png",
+            url: "https://ytmgr.userbyte.xyz/img/png/logo.png",
             width: 175,
             height: 175,
           },

@@ -12,7 +12,7 @@ const { publicRuntimeConfig } = getConfig();
 export async function GET() {
   const version = publicRuntimeConfig?.version;
   return NextResponse.json({
-    name: "spotifam-manager API",
+    name: "ytfam-manager API",
     api_version: version,
   });
 }

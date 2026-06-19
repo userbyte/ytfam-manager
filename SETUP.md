@@ -1,4 +1,4 @@
-# spotifam-manager setup
+# ytfam-manager setup
 
 ### you need a MongoDB server setup before you begin, so go do that if you dont have one already
 
@@ -9,10 +9,10 @@
 _if you don't have docker installed yet, go install it then come back
 **you also need a mongodb server!**_
 
-**pull the [image](https://hub.docker.com/r/userbyte/sfmgr)**
+**pull the [image](https://hub.docker.com/r/userbyte/ytmgr)**
 
 ```sh
-docker pull userbyte/sfmgr:latest
+docker pull userbyte/ytmgr:latest
 ```
 
 **create the container**
@@ -20,13 +20,13 @@ docker pull userbyte/sfmgr:latest
 ```sh
 # change these things:
 #     $NAME :: desired container and volume docker name
-#     $PORT :: the port you want sfmgr to be exposed on
+#     $PORT :: the port you want ytmgr to be exposed on
 #    $MONGO :: URI for your MongoDB instance (ex. mongodb://127.0.0.1:27017)
 #   $SECRET :: some super incredibly secret string
-export NAME="sfmgr";
+export NAME="ytmgr";
 export MONGO="...";
 export SECRET="...";
-docker create --env MONGO_URI=$MONGO --env JOB_SECRET=$SECRET --name $NAME --network=host --restart always userbyte/sfmgr:latest
+docker create --env MONGO_URI=$MONGO --env JOB_SECRET=$SECRET --name $NAME --network=host --restart always userbyte/ytmgr:latest
 ```
 
 **start the container**
@@ -48,8 +48,8 @@ _if you don't have node, npm, and yarn installed yet, go install em then come ba
 **clone this github repo**
 
 ```sh
-git clone https://github.com/userbyte/sfmgr
-cd sfmgr
+git clone https://github.com/userbyte/ytmgr
+cd ytmgr
 ```
 
 **install dependencies**

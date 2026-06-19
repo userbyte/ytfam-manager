@@ -1,6 +1,6 @@
 {
-  "name": "spotifam-manager",
-  "version": "0.2.12",
+  "name": "ytfam-manager",
+  "version": "0.2.13",
   "private": true,
   "scripts": {
     "dev": "next dev",

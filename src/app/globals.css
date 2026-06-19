@@ -1,9 +1,9 @@
 :root {
-  --background: #000000;
+  --background: #0f0f0f;
   --foreground: #ffffff;
   --element-background: #121212;
   --element-foreground: #1f1f1f;
-  --sp-accent: #1ed760;
+  --yt-accent: #ff0000;
 }
 
 html,
@@ -15,7 +15,7 @@ body {
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: var(--font-spotify-mix), sans-serif;
+  font-family: var(--font-roboto), sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -35,25 +35,25 @@ button {
   font-family: inherit;
   font-size: 1.2em;
   font-weight: bold;
-  padding: 0.65em 1em;
+  padding: 10px 16px;
   border: none;
   border-radius: 32px;
-  background-color: #1ed760;
-  color: black;
+  background-color: #272727;
+  color: #f1f1f1;
 }
 
 button:hover {
   cursor: pointer;
-  background-color: #18c555;
+  background-color: #3f3f3f;
 }
 
 input {
   font-family: inherit;
   font-size: 1.2em;
-  background-color: #1f1f1f;
+  background-color: #121212;
   outline: none;
-  padding: 0.65em 1.2em;
-  border: 2px solid #1f1f1f;
+  padding: 10px 16px;
+  border: 2px solid #303030;
   border-radius: 32px;
   width: 100%;
 }

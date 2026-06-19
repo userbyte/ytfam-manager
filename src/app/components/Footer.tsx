@@ -7,7 +7,7 @@ export default function Footer() {
 
   return (
     <footer className={styles.footer}>
-      <p>spotifam-manager v{publicRuntimeConfig?.version}</p>
+      <p>ytfam-manager v{publicRuntimeConfig?.version}</p>
       <p>
         &copy;{" "}
         <a id="homepageFooterLink" href="https://userbyte.xyz">

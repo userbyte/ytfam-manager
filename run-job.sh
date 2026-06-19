@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 JOB_NAME=$1
-SFMGR_URL="http://127.0.0.1:3000"
+YTMGR_URL="http://127.0.0.1:3000"
 
 if [ -z ${JOB_SECRET+x} ]; then
   if [ -f .env ]; then
@@ -15,5 +15,5 @@ else
 fi
 
 echo "triggering $JOB_NAME job..."
-resp=$(curl -s --header "psst: $JOB_SECRET" --request GET $SFMGR_URL/api/jobs/$JOB_NAME)
+resp=$(curl -s --header "psst: $JOB_SECRET" --request GET $YTMGR_URL/api/jobs/$JOB_NAME)
 echo $resp

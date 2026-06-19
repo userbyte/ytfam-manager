@@ -11,7 +11,9 @@
 }
 
 .main button {
-  border: 2px solid #1ed760;
+  border: 2px solid #303030;
+  border-left: unset;
+  color: white;
   height: fit-content;
   width: fit-content;
   font-weight: 1000;

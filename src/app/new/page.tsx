@@ -3,7 +3,7 @@ import NewFamilyDialog from "../components/NewFamilyDialog";
 import styles from "@/app/style/module/NewFamilyPage.module.css";
 
 export const metadata: Metadata = {
-  title: "spotifam-manager",
+  title: "ytfam-manager",
   description: "Create a new family...",
 };
 

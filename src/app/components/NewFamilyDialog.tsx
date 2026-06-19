@@ -93,6 +93,10 @@ export default function NewFamilyDialog() {
           // user is spamming enter, return early to prevent animation cutoff
           return;
         }
+        if (newMember.trim() === "") toast.warn("Maximum members reached");
+        if (planMembers.includes(newMember))
+          toast.warn("Duplicate member name not allowed");
+        if (newMember.trim() === "") toast.warn("Please enter a member name");
         memberInputRef.current.className = "redshake";
         sleep(500).then(() => {
           if (memberInputRef.current) memberInputRef.current.className = "";
@@ -116,7 +120,34 @@ export default function NewFamilyDialog() {
       const planStart = planStartInputRef.current.valueAsNumber / 1000;
       const price = renewalCostInputRef.current.valueAsNumber;
 
-      // TODO: validate inputs
+      // validate inputs
+      if (!familyName || familyName === "") {
+        toast.warn("Family name cannot be empty");
+        familyNameInputRef.current.className = "redshake";
+        sleep(500).then(() => {
+          if (familyNameInputRef.current)
+            familyNameInputRef.current.className = "";
+        });
+        return;
+      }
+      if (!planStart) {
+        toast.warn("Plan start date cannot be empty");
+        planStartInputRef.current.className = "redshake";
+        sleep(500).then(() => {
+          if (planStartInputRef.current)
+            planStartInputRef.current.className = "";
+        });
+        return;
+      }
+      if (!price) {
+        toast.warn("Price cannot be empty");
+        renewalCostInputRef.current.className = "redshake";
+        sleep(500).then(() => {
+          if (renewalCostInputRef.current)
+            renewalCostInputRef.current.className = "";
+        });
+        return;
+      }
 
       const resp = await fetch("/api/family", {
         method: "POST",
@@ -153,7 +184,7 @@ export default function NewFamilyDialog() {
       <input
         ref={familyNameInputRef}
         type="text"
-        placeholder="Spotify slimes..."
+        placeholder="YouTube slimes..."
       />
       <span>
         <div className="startdatediv">
@@ -165,8 +196,8 @@ export default function NewFamilyDialog() {
           <input
             ref={renewalCostInputRef}
             type="number"
-            placeholder="$20"
-            defaultValue={20}
+            placeholder="$27"
+            defaultValue={27}
           />
         </div>
       </span>
