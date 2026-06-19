@@ -38,7 +38,7 @@
   margin: 0;
   margin-bottom: -0.5em;
   font-size: 1.25em;
-  font-weight: bold;
+  font-weight: 800;
 }
 
 .main div[class="modal"] hr {
@@ -64,18 +64,13 @@
 }
 
 .main div[class="modal"] button[class="close_button"] {
-  width: 30%;
-  background-color: white;
+  width: 35%;
   position: relative;
   right: 0;
 }
 
-.main div[class="modal"] button[class="close_button"]:hover {
-  background-color: #d8d8d8;
-}
-
 .main div[class="modal"] button[class="add_button"] {
-  width: 70%;
+  width: 65%;
 }
 
 .main div[class="modal"] span {

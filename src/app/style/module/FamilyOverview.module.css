@@ -146,8 +146,16 @@
   span[class="member_action_buttons"]
   button {
   font-size: 0.9em;
-  background-color: #e6e6e6;
+  background-color: #303030;
   border-radius: 12px;
+}
+
+.main
+  div[class="member_list"]
+  div[class="member_item"]
+  span[class="member_action_buttons"]
+  button:hover {
+  background-color: #535353;
 }
 
 .main a[class="approve_deny_buttons"] {
