@@ -69,10 +69,16 @@ export default function NewFamilyDialog() {
 
   // states
   const [planMembers, setPlanMembers] = useState<Array<string>>(["admin"]);
+  const [pageNumber, setPageNumber] = useState<number>(1);
+  const [redShakeTarget, setRedShakeTarget] = useState<string | null>(null);
+
+  const [familyName, setFamilyName] = useState<string>("");
+  const [planStart, setPlanStart] = useState<number | null>(null);
+  const [renewalCost, setRenewalCost] = useState<number>(27);
+  const [rounding, setRounding] = useState<string>("up");
+  const [initialCharge, setInitialCharge] = useState<boolean>(false);
+
   // refs
-  const familyNameInputRef = useRef<HTMLInputElement | null>(null);
-  const planStartInputRef = useRef<HTMLInputElement | null>(null);
-  const renewalCostInputRef = useRef<HTMLInputElement | null>(null);
   const memberInputRef = useRef<HTMLInputElement | null>(null);
 
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
@@ -93,12 +99,12 @@ export default function NewFamilyDialog() {
           // user is spamming enter, return early to prevent animation cutoff
           return;
         }
-        if (newMember.trim() === "") toast.warn("Maximum members reached");
+        if (planMembers.length === 6) toast.warn("Maximum members reached");
         if (planMembers.includes(newMember))
           toast.warn("Duplicate member name not allowed");
         if (newMember.trim() === "") toast.warn("Please enter a member name");
         memberInputRef.current.className = "redshake";
-        sleep(500).then(() => {
+        sleep(250).then(() => {
           if (memberInputRef.current) memberInputRef.current.className = "";
         });
         return;
@@ -111,40 +117,32 @@ export default function NewFamilyDialog() {
   }
 
   async function submitFamilyCreate() {
-    if (
-      familyNameInputRef.current &&
-      planStartInputRef.current &&
-      renewalCostInputRef.current
-    ) {
-      const familyName = familyNameInputRef.current.value;
-      const planStart = planStartInputRef.current.valueAsNumber / 1000;
-      const price = renewalCostInputRef.current.valueAsNumber;
-
+    if (familyName && planStart && renewalCost) {
       // validate inputs
       if (!familyName || familyName === "") {
-        toast.warn("Family name cannot be empty");
-        familyNameInputRef.current.className = "redshake";
+        toast.warn("Family name is invalid");
+        setPageNumber(1);
+        setRedShakeTarget("familyName");
         sleep(500).then(() => {
-          if (familyNameInputRef.current)
-            familyNameInputRef.current.className = "";
+          setRedShakeTarget(null);
         });
         return;
       }
       if (!planStart) {
         toast.warn("Plan start date cannot be empty");
-        planStartInputRef.current.className = "redshake";
-        sleep(500).then(() => {
-          if (planStartInputRef.current)
-            planStartInputRef.current.className = "";
+        setPageNumber(2);
+        setRedShakeTarget("planStart");
+        sleep(750).then(() => {
+          setRedShakeTarget(null);
         });
         return;
       }
-      if (!price) {
-        toast.warn("Price cannot be empty");
-        renewalCostInputRef.current.className = "redshake";
-        sleep(500).then(() => {
-          if (renewalCostInputRef.current)
-            renewalCostInputRef.current.className = "";
+      if (!renewalCost) {
+        toast.warn("Renewal is invalid");
+        setPageNumber(2);
+        setRedShakeTarget("renewalCost");
+        sleep(750).then(() => {
+          setRedShakeTarget(null);
         });
         return;
       }
@@ -154,8 +152,10 @@ export default function NewFamilyDialog() {
         body: JSON.stringify({
           name: familyName,
           plan_start: planStart,
-          price: price,
+          price: renewalCost,
           members: planMembers,
+          rounding: rounding,
+          initial_charge: initialCharge ? "true" : "false",
         }),
       });
       const resp_json = await resp.json();
@@ -174,50 +174,312 @@ export default function NewFamilyDialog() {
     }
   }
 
+  function calculatePerMemberCost() {
+    let cost = renewalCost / planMembers.length;
+    cost = Math.round(cost * 10) / 10;
+    switch (rounding) {
+      case "up":
+        // round up to the nearest dollar
+        cost = Math.round(renewalCost / planMembers.length);
+        break;
+      case "down":
+        // round down to the nearest dollar
+        cost = Math.floor(renewalCost / planMembers.length);
+        break;
+      case "none":
+        // rounding is disabled
+        break;
+
+      default:
+        // rounding is disabled
+        break;
+    }
+    return cost;
+  }
+
   return (
     <div className={styles.main}>
       <span>
         <BackBtn />
         <h1>Create a new family</h1>
       </span>
-      <label>Family name</label>
-      <input
-        ref={familyNameInputRef}
-        type="text"
-        placeholder="YouTube slimes..."
-      />
-      <span>
-        <div className="startdatediv">
-          <label>Plan start date</label>
-          <input ref={planStartInputRef} type="date" />
-        </div>
-        <div className="costdiv">
-          <label>Renewal cost ($ / mo)</label>
-          <input
-            ref={renewalCostInputRef}
-            type="number"
-            placeholder="$27"
-            defaultValue={27}
-          />
-        </div>
-      </span>
-      <label>Add some members... ({planMembers.length}/6)</label>
-      <span>
+      <div
+        className="page"
+        style={{ display: pageNumber === 1 ? "flex" : "none" }}
+      >
+        <p className="desc_text">
+          Welcome to ytfam-manager!
+          <br />
+          Let&apos;s get started... first, you&apos;ll need to set a name for
+          your new YouTube Premium family
+        </p>
+        <label>Family name</label>
         <input
           type="text"
-          placeholder="Member name..."
-          ref={memberInputRef}
-          onKeyDown={handleKeyDown}
+          placeholder="YouTube slimes..."
+          className={redShakeTarget === "familyName" ? "redshake" : ""}
+          onChange={(e) => {
+            setFamilyName(e.currentTarget.value);
+          }}
         />
-        <button onClick={addMember}>
-          <FontAwesomeIcon icon={faUserPlus} />
+
+        <button
+          onClick={() => {
+            // validate inputs before moving on
+            if (!familyName || familyName === "") {
+              console.log(familyName);
+              toast.warn("Family name cannot be empty");
+              setRedShakeTarget("familyName");
+              sleep(250).then(() => {
+                setRedShakeTarget(null);
+              });
+              return;
+            }
+            setPageNumber((cur) => cur + 1);
+          }}
+        >
+          Next &gt;
         </button>
-      </span>
-      <p className="admin_notice">
-        * first member will be the family administrator
-      </p>
-      <MemberList planMembers={planMembers} setPlanMembers={setPlanMembers} />
-      <button onClick={submitFamilyCreate}>Create</button>
+      </div>
+      <div
+        className="page"
+        style={{ display: pageNumber === 2 ? "flex" : "none" }}
+      >
+        <p className="desc_text">
+          We&apos;ll need some plan information to automate balance changes.
+        </p>
+        <div>
+          <label>Plan start date</label>
+          <p className="desc_text">When did the plan start?</p>
+          <input
+            type="date"
+            className={redShakeTarget === "planStart" ? "redshake" : ""}
+            onChange={(e) => setPlanStart(e.currentTarget.valueAsNumber / 1000)}
+          />
+        </div>
+        <div>
+          <label>Renewal cost ($ / mo)</label>
+          <p className="desc_text">What is the monthly cost of the plan?</p>
+          <input
+            type="number"
+            placeholder="$27"
+            className={redShakeTarget === "renewalCost" ? "redshake" : ""}
+            defaultValue={27}
+            onKeyDown={(e) => {
+              // validate input
+              // prevent invalid character from being added
+              // but we still allow backspace so they can fix their mistake lol
+              const allowedKeys = [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "Backspace",
+              ];
+              if (!allowedKeys.includes(e.key)) {
+                e.preventDefault();
+                e.stopPropagation();
+                toast.warn("That's not a number. Ti glupi peder.");
+                setRedShakeTarget("renewalCost");
+                sleep(250).then(() => {
+                  setRedShakeTarget(null);
+                });
+                return;
+              }
+
+              setRenewalCost(e.currentTarget.valueAsNumber);
+            }}
+          />
+        </div>
+        <span className="page_controls">
+          <button onClick={() => setPageNumber((cur) => cur - 1)}>
+            &lt; Back
+          </button>
+          <nav className="page_indicators">
+            <ul>
+              <li></li>
+              <li className="cur_page"></li>
+              <li></li>
+              <li></li>
+              <li></li>
+            </ul>
+          </nav>
+          <button
+            onClick={() => {
+              // validate inputs before moving on
+              if (!planStart) {
+                toast.warn("Plan start date cannot be empty");
+                setRedShakeTarget("planStart");
+                sleep(250).then(() => {
+                  setRedShakeTarget(null);
+                });
+                return;
+              }
+              if (!renewalCost || renewalCost < 1) {
+                toast.warn("Invalid renewal cost");
+                setRedShakeTarget("renewalCost");
+                sleep(250).then(() => {
+                  setRedShakeTarget(null);
+                });
+                return;
+              }
+
+              setPageNumber((cur) => cur + 1);
+            }}
+          >
+            Next &gt;
+          </button>
+        </span>
+      </div>
+      <div
+        className="page"
+        style={{ display: pageNumber === 3 ? "flex" : "none" }}
+      >
+        <p className="desc_text">
+          Now it&apos;s time to add some people to the family.
+        </p>
+        <label>Add some members... ({planMembers.length}/6)</label>
+        <span>
+          <input
+            type="text"
+            placeholder="Member name..."
+            ref={memberInputRef}
+            onKeyDown={handleKeyDown}
+          />
+          <button onClick={addMember}>
+            <FontAwesomeIcon icon={faUserPlus} />
+          </button>
+        </span>
+        <p className="admin_notice">
+          * first member will be the family administrator
+        </p>
+        <MemberList planMembers={planMembers} setPlanMembers={setPlanMembers} />
+        <span className="page_controls">
+          <button onClick={() => setPageNumber((cur) => cur - 1)}>
+            &lt; Back
+          </button>
+          <nav className="page_indicators">
+            <ul>
+              <li></li>
+              <li></li>
+              <li className="cur_page"></li>
+              <li></li>
+              <li></li>
+            </ul>
+          </nav>
+          <button
+            onClick={() => {
+              // validate inputs before moving on
+              // TODO
+
+              setPageNumber((cur) => cur + 1);
+            }}
+          >
+            Next &gt;
+          </button>
+        </span>
+      </div>
+      <div
+        className="page"
+        style={{ display: pageNumber === 4 ? "flex" : "none" }}
+      >
+        <label>Cost rounding</label>
+        <p className="desc_text">What should everyone be charged?</p>
+        <select onChange={(e) => setRounding(e.currentTarget.value)}>
+          <option value={"up"}>
+            Round up (${renewalCost / planMembers.length} ➡ $
+            {Math.round(renewalCost / planMembers.length)})
+          </option>
+          <option value={"down"}>
+            Round down (${renewalCost / planMembers.length} ➡ $
+            {Math.floor(renewalCost / planMembers.length)})
+          </option>
+          <option value={"none"}>
+            No rounding (${renewalCost} ➡ ${renewalCost / planMembers.length})
+          </option>
+        </select>
+        <label>Initial charge</label>
+        <select
+          onChange={(e) => setInitialCharge(e.currentTarget.value === "true")}
+        >
+          <option value={"false"}>
+            Don&apos;t add a charge for this month
+          </option>
+          <option value={"true"}>Add a charge for this month</option>
+        </select>
+        <span className="page_controls">
+          <button onClick={() => setPageNumber((cur) => cur - 1)}>
+            &lt; Back
+          </button>
+          <nav className="page_indicators">
+            <ul>
+              <li></li>
+              <li></li>
+              <li></li>
+              <li className="cur_page"></li>
+              <li></li>
+            </ul>
+          </nav>
+          <button
+            onClick={() => {
+              // validate inputs before moving on
+              // TODO
+
+              setPageNumber((cur) => cur + 1);
+            }}
+          >
+            Next &gt;
+          </button>
+        </span>
+      </div>
+      <div
+        className="page"
+        style={{ display: pageNumber === 5 ? "flex" : "none" }}
+      >
+        <h3>Summary</h3>
+        <p className="desc_text">
+          Final step! Double check everything here, then hit create when you're
+          ready!
+        </p>
+        <div>
+          <label>Family name</label>
+          <p>{familyName}</p>
+        </div>
+        <div>
+          <label>Renewal cost</label>
+          <p>${renewalCost} per month</p>
+          <p>${calculatePerMemberCost()} per member</p>
+        </div>
+        <div>
+          <label>Members (6)</label>
+          <ul>
+            {planMembers.map((memberName) => {
+              return <li key={memberName}>{memberName}</li>;
+            })}
+          </ul>
+        </div>
+        <span className="page_controls">
+          <button onClick={() => setPageNumber((cur) => cur - 1)}>
+            &lt; Back
+          </button>
+          <nav className="page_indicators">
+            <ul>
+              <li></li>
+              <li></li>
+              <li></li>
+              <li></li>
+              <li className="cur_page"></li>
+            </ul>
+          </nav>
+          <button onClick={submitFamilyCreate}>Create!</button>
+        </span>
+      </div>
     </div>
   );
 }

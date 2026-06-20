@@ -1,18 +1,19 @@
 @keyframes redshake {
   0% {
     border-color: #cf2222;
+    transform: translateX(0px);
   }
   30% {
     border-color: #cf2222;
-    transform: translateX(-3px);
+    transform: translateX(-5px);
   }
 
   60% {
     border-color: #cf2222;
-    transform: translateX(3px);
+    transform: translateX(5px);
   }
   100% {
-    border-color: initial;
+    transform: translateX(0px);
   }
 }
 
@@ -20,11 +21,19 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-width: 34em;
+  width: 30em;
   padding: 0.8em 2em;
   padding-bottom: 2em;
   background-color: var(--element-background);
   border-radius: 8px;
+}
+
+.main div[class="page"] {
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+  gap: 12px;
+  width: 80%;
 }
 
 .main label {
@@ -39,21 +48,45 @@
   align-items: center;
 }
 
+.main span[class="page_controls"] {
+  margin-top: 1em;
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  align-content: center;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #272727;
+  border-radius: 40px;
+  width: 100%;
+  align-self: center;
+  justify-content: space-between;
+}
+
+.main select {
+  font-size: 1.1em;
+  color: #f1f1f1;
+  background-color: var(--element-foreground);
+  padding: 0.6em;
+  border: 2px solid var(--element-foreground);
+  border-radius: 30px;
+}
+
+.main span[class="page_controls"] button:nth-of-type(1) {
+  border-top-right-radius: unset;
+  border-bottom-right-radius: unset;
+}
+.main span[class="page_controls"] button:nth-of-type(2) {
+  border-top-left-radius: unset;
+  border-bottom-left-radius: unset;
+}
+
 .main input[class="redshake"] {
-  animation: redshake 250ms linear;
+  animation: redshake 250ms linear infinite;
 }
 
-.main div[class="startdatediv"] input,
-.main div[class="costdiv"] input {
-  margin-top: 0.5em;
-}
-
-.main div[class="startdatediv"] {
-  width: 60%;
-}
-
-.main div[class="costdiv"] {
-  width: 40%;
+.main input[type="date"] {
+  width: 100%;
 }
 
 .member_list {
@@ -66,6 +99,7 @@
   display: flex;
   flex-direction: row;
   gap: 20px;
+  height: 3em;
   align-items: center;
   border: 2px solid #4f4f4f;
   border-radius: 48px;
@@ -74,7 +108,7 @@
 
 .member_list span p {
   font-size: 1.2em;
-  font-weight: bold;
+  /* font-weight: bold; */
   margin-left: 1em;
 }
 
@@ -84,12 +118,61 @@
   margin-right: 0.4em;
 }
 
-.member_list span button:hover {
-  margin-right: 0.3em;
-  font-size: 1.5em;
-}
 .main p[class="admin_notice"] {
   padding: 0;
   margin: 0;
   font-style: italic;
+}
+
+.main p,
+.main h3,
+.main ul,
+.main li {
+  margin: 0;
+}
+
+.main p[class="desc_text"] {
+  color: #888888;
+}
+
+.main nav[class="page_indicators"] {
+  text-align: center;
+}
+
+.main nav[class="page_indicators"] ul {
+  display: flex;
+  text-align: center;
+  gap: 1em;
+}
+
+.main nav[class="page_indicators"] ul li[class="cur_page"] {
+  background-color: #ffffff;
+}
+
+.main nav[class="page_indicators"] ul li {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 10px;
+  background-color: #444444;
+  cursor: pointer;
+}
+
+/* --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- */
+/*                              responsive shit                                */
+/* ---                                                                     --- */
+
+/* less than 1000px width screen -- most phones*/
+@media only screen and (max-width: 1000px) {
+  .main {
+    width: 94%;
+    padding: 1em 1em;
+    font-size: 13px;
+  }
+  .main h1 {
+    font-size: 20px;
+  }
+  .main span[class="page_controls"] {
+    width: 115%;
+  }
 }
