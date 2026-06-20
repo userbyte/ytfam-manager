@@ -215,8 +215,11 @@ export default function FamilyOverview({
           logEls.push(
             <p key={`charge-${charge.id}`}>
               [{prettifyUnixTime(charge.timestamp)}] Family charged for $
-              {charge.amount} (${charge.memberCost} at {charge.memberCount}{" "}
-              members)
+              {charge.amount}{" "}
+              {charge.memberCost != undefined
+                ? `(\$${charge.memberCost} at ${charge.memberCount} 
+              members)`
+                : ""}
             </p>
           );
           break;
