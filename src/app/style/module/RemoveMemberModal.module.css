@@ -41,6 +41,7 @@
   display: flex;
   gap: 10px;
   flex-direction: column;
+  align-items: center;
   border-radius: 32px;
   padding: 1.6em;
   background-color: var(--element-background);
@@ -50,20 +51,16 @@
 .main div[class="modal"] h2 {
   text-align: center;
   max-width: 24ch;
+  margin: 0;
 }
 
 .main div[class="modal"] button {
   width: 10em;
-  background-color: white;
   position: relative;
-  border: 2px solid white;
+  border: 2px solid #272727;
   right: 0;
 }
 
-.main div[class="modal"] button[class="no_button"]:hover {
-  background-color: #d8d8d8;
-  border: 2px solid #d8d8d8;
-}
 .main div[class="modal"] button[class="yes_button"]:hover {
   background-color: #db2828;
   border: 2px solid rgb(205, 128, 128);
