@@ -2,14 +2,16 @@
 // /api/family/members
 
 import db from "@/app/drivers/db";
-import { Family, Member } from "@/app/models/db";
+import { BalanceAdjustment, Family, Member } from "@/app/models/db";
 import {
   addMember,
   removeMember,
   getFamily,
   isAdminCode,
+  addAdjustment,
+  getMe,
 } from "@/app/utils/db";
-import { generateRandomString } from "@/app/utils/shared";
+import { generateRandomString, unixTimestampNow } from "@/app/utils/shared";
 
 // POST /api/family/members
 export async function POST(request: Request) {
@@ -260,7 +262,7 @@ export async function PATCH(request: Request) {
           }
         );
       }
-
+      let balanceAdj: BalanceAdjustment | undefined = undefined;
       // apply modifications to the member
       for (const [key, value] of Object.entries(memberUpd)) {
         if (key === "name") {
@@ -285,10 +287,35 @@ export async function PATCH(request: Request) {
         }
         // only update if theres a diff between values
         if (updated_family.members[memberIndex][key] != value) {
+          const prevValue = updated_family.members[memberIndex][key];
           console.log(
-            `updating member [name="${targetMember}" (${key}: ${updated_family.members[memberIndex][key]} --> ${value})]...`
+            `updating member [name="${targetMember}" (${key}: ${prevValue} --> ${value})]...`
           );
           updated_family.members[memberIndex][key] = value;
+
+          // add balance adjustment if applicable
+          if (key === "balance") {
+            if (updated_family.adjustments) {
+              const adjuster = await getMe({ full_code: full_code });
+
+              balanceAdj = {
+                id: updated_family.adjustments.length + 1,
+                timestamp: unixTimestampNow(),
+                adjuster:
+                  adjuster != null && adjuster != "DB_ERROR"
+                    ? adjuster.name
+                    : "(unknown)",
+                adjusted: targetMember,
+                balanceFrom: Number(prevValue),
+                balanceTo: Number(value),
+              };
+
+              updated_family.adjustments = [
+                ...updated_family.adjustments,
+                balanceAdj,
+              ];
+            }
+          }
         }
       }
 
@@ -300,6 +327,7 @@ export async function PATCH(request: Request) {
         JSON.stringify({
           status: "success",
           member: updated_family.members[memberIndex],
+          balanceAdjustment: balanceAdj,
         }),
         {
           status: 200,

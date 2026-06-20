@@ -27,6 +27,19 @@ export type Charge = {
   memberCost: number;
 };
 
+export type BalanceAdjustment = {
+  id: number;
+  timestamp: number;
+  /** Admin doing the adjusting */
+  adjuster: string;
+  /** Member who the adjustment is applying to */
+  adjusted: string;
+  /** Member balance before adjustment */
+  balanceFrom: number;
+  /** Member balance after adjustment */
+  balanceTo: number;
+};
+
 export type Family = {
   [key: string]:
     | string
@@ -34,6 +47,7 @@ export type Family = {
     | Array<Member>
     | Array<Payment>
     | Array<Charge>
+    | Array<BalanceAdjustment>
     | undefined;
   name: string;
   family_code: string;
@@ -44,6 +58,7 @@ export type Family = {
   members: Array<Member>;
   payments: Array<Payment>;
   charges: Array<Charge>;
+  adjustments: Array<BalanceAdjustment>;
 };
 
 export type MemberStripped = {

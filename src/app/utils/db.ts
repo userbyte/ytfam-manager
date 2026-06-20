@@ -1,5 +1,7 @@
 import db from "../drivers/db";
 import {
+  BalanceAdjustment,
+  Charge,
   Family,
   FamilyStripped,
   Member,
@@ -7,6 +9,13 @@ import {
   Payment,
 } from "../models/db";
 
+/**
+ * Get a family object from the database.
+ * @param {object} data Parent param object
+ * @param {string} [data.full_code] Target full code
+ * @param {string} [data.family_code] Target family code
+ * @param {boolean} [data.force_nostrip] Should the family data be stripped?
+ */
 export async function getFamily({
   full_code,
   family_code,
@@ -40,17 +49,48 @@ export async function getFamily({
     } else {
       // family data exists!
 
+      // migrate from an old schema if applicable
+      const updated_family: Family = Object(family);
+      let migrationNeeded: boolean = false;
+      if (!family.rounding) {
+        console.warn(
+          `family ${family.family_code} is missing rounding prop, adding it...`
+        );
+        updated_family.rounding = "up";
+
+        // set migrationNeeded flag to true so the update gets applied to the database
+        migrationNeeded = true;
+      }
+      if (!family.adjustments) {
+        console.warn(
+          `family ${family.family_code} is missing adjustments prop, adding it...`
+        );
+        const updated_family: Family = Object(family);
+        updated_family.adjustments = [];
+
+        // set migrationNeeded flag to true so the update gets applied to the database
+        migrationNeeded = true;
+      }
+
+      // if a migration is needed, replace old family object in db with migrated one
+      if (migrationNeeded) {
+        await db
+          .collection("family")
+          .replaceOne({ family_code: family.family_code }, updated_family);
+      }
+
       // cast family db object to a Family object so the function signature is happy
       const family_: Family = {
-        name: family.name,
-        family_code: family.family_code,
-        plan_start: family.plan_start,
-        next_renewal: family.next_renewal,
-        price: family.price,
-        rounding: family.rounding,
-        members: family.members,
-        payments: family.payments,
-        charges: family.charges,
+        name: updated_family.name,
+        family_code: updated_family.family_code,
+        plan_start: updated_family.plan_start,
+        next_renewal: updated_family.next_renewal,
+        price: updated_family.price,
+        rounding: updated_family.rounding,
+        members: updated_family.members,
+        payments: updated_family.payments,
+        charges: updated_family.charges,
+        adjustments: updated_family.adjustments,
       };
 
       // get requesting member using the provided passcode
@@ -100,6 +140,12 @@ export async function getFamily({
     return "DB_ERROR";
   }
 }
+
+/**
+ * Get your member object from the database.
+ * @param {object} data Parent param object
+ * @param {string} data.full_code Member full code
+ */
 export async function getMe({
   full_code,
 }: {
@@ -170,6 +216,95 @@ export async function addPayment({
   }
 }
 
+/**
+ * Add a charge to a family charge list.
+ *
+ * @param {object} data  Parent param object
+ * @param {string} data.family_code  Target family code
+ * @param {Charge} data.charge  Charge object to add to list
+ */
+export async function addCharge({
+  family_code,
+  charge,
+}: {
+  family_code: string;
+  charge: Charge;
+}): Promise<true | "DB_ERROR" | null> {
+  if (db) {
+    const coll = db.collection("family");
+    const family = await coll.findOne({ family_code: family_code });
+
+    if (!family) {
+      // family data is null
+      return null;
+    } else {
+      // family data exists!
+
+      // create an object to store updated data
+      const updated_family: Family = Object(family);
+
+      // add charge to the charge list
+      updated_family.charges = [...family.charges, charge];
+
+      // update db by replacing db object with an updated one
+      await coll.replaceOne({ family_code: family_code }, updated_family);
+
+      return true;
+    }
+  } else {
+    // db is null
+    console.error("addPayment(): database error");
+    return "DB_ERROR";
+  }
+}
+
+/**
+ * Add a balance adjustment to a family adjustments list.
+ *
+ * @param {object} data
+ * @param {string} data.family_code  Target family code
+ * @param {BalanceAdjustment} data.adjustment  Adjustment object to add to list
+ */
+export async function addAdjustment({
+  family_code,
+  adjustment,
+}: {
+  family_code: string;
+  adjustment: BalanceAdjustment;
+}): Promise<true | "DB_ERROR" | null> {
+  if (db) {
+    const coll = db.collection("family");
+    const family = await coll.findOne({ family_code: family_code });
+    if (!family) {
+      // family data is null
+      return null;
+    } else {
+      // family data exists!
+
+      // create an object to store updated data
+      const updated_family: Family = Object(family);
+
+      // add adjustment to the adjustments list
+      updated_family.adjustments = [...family.adjustments, adjustment];
+
+      // update db by replacing db object with an updated one
+      await coll.replaceOne({ family_code: family_code }, updated_family);
+
+      return true;
+    }
+  } else {
+    // db is null
+    console.error("addPayment(): database error");
+    return "DB_ERROR";
+  }
+}
+
+/**
+ * Add a member to a family.
+ *
+ * @param {string} data Parent param object
+ * @param {object} data.member  Member to add
+ */
 export async function addMember({
   family_code,
   member,
@@ -205,6 +340,12 @@ export async function addMember({
   }
 }
 
+/**
+ * Remove a member from a family.
+ *
+ * @param {string} data Parent param object
+ * @param {string} data.memberName  Member to remove (by name)
+ */
 export async function removeMember({
   family_code,
   memberName,
@@ -245,6 +386,12 @@ export async function removeMember({
   }
 }
 
+/**
+ * Check if the provided code is an admin code.
+ *
+ * @param {string} data Parent param object
+ * @param {string} data.full_code  Full code to check
+ */
 export async function isAdminCode({
   full_code,
 }: {

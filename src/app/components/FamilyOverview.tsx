@@ -1,7 +1,13 @@
 "use client";
 import styles from "@/app/style/module/FamilyOverview.module.css";
 import { prettifyUnixTime } from "../utils/shared";
-import { Family, Member, Payment } from "../models/db";
+import {
+  BalanceAdjustment,
+  Charge,
+  Family,
+  Member,
+  Payment,
+} from "../models/db";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faAdd,
@@ -73,10 +79,11 @@ export default function FamilyOverview({
     plan_start: 0,
     next_renewal: 0,
     price: 0,
-    rounding: "none",
+    rounding: "up",
     members: [],
     payments: [],
     charges: [],
+    adjustments: [],
   });
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [targetMember, setTargetMember] = useState<Member | null>(null);
@@ -174,55 +181,127 @@ export default function FamilyOverview({
     return memberEls;
   }
 
-  function generatePaymentLogEls(paymentList: Array<Payment>) {
+  function generateTransactionLogEls(
+    paymentList: Array<Payment>,
+    chargeList: Array<Charge>,
+    adjustmentsList: Array<BalanceAdjustment>
+  ) {
     const logEls: Array<React.JSX.Element> = [];
 
-    // sort payments by timestamp
-    paymentList.sort((a, b) => a.timestamp - b.timestamp);
-
-    // iterate through payments and create elements for them
+    // combine charge and payment lists
+    const transactionLog: Array<{
+      type: "charge" | "payment" | "adjustment";
+      data: Charge | Payment | BalanceAdjustment;
+    }> = [];
     paymentList.forEach((payment) => {
+      if (payment) transactionLog.push({ type: "payment", data: payment });
+    });
+    chargeList.forEach((charge) => {
+      if (charge) transactionLog.push({ type: "charge", data: charge });
+    });
+    adjustmentsList.forEach((adjustment) => {
+      if (adjustment)
+        transactionLog.push({ type: "adjustment", data: adjustment });
+    });
+
+    // sort transactionLog by timestamp
+    transactionLog.sort((a, b) => a.data.timestamp - b.data.timestamp);
+
+    // iterate through transactionLog and create elements for them
+    transactionLog.forEach((item) => {
+      switch (item.type) {
+        case "charge": {
+          const charge = item.data as Charge;
+          logEls.push(
+            <p key={`charge-${charge.id}`}>
+              [{prettifyUnixTime(charge.timestamp)}] Family charged for $
+              {charge.amount} (${charge.memberCost} at {charge.memberCount}{" "}
+              members)
+            </p>
+          );
+          break;
+        }
+
+        case "payment": {
+          const payment = item.data as Payment;
+          logEls.push(
+            <p key={`payment-${payment.id}`} className="payment_log_item">
+              [{prettifyUnixTime(payment.timestamp)}]{" "}
+              {payment.processed ? (
+                <a title="Processed">(✅)</a>
+              ) : (
+                <a title="Pending processing">(⏳)</a>
+              )}
+              {payment.approved ? (
+                <></>
+              ) : (
+                <a title="Awaiting admin approval">(📬)</a>
+              )}{" "}
+              {payment.member} sent a payment of ${payment.amount}
+              {isAdmin ? (
+                payment.approved ? (
+                  <></>
+                ) : (
+                  <>
+                    {" - [ "}
+                    <a
+                      className="approve_deny_buttons"
+                      onClick={approvePayment}
+                      data-payment-id={payment.id}
+                    >
+                      approve
+                    </a>
+                    {" / "}
+                    <a
+                      className="approve_deny_buttons"
+                      onClick={disprovePayment}
+                      data-payment-id={payment.id}
+                    >
+                      deny
+                    </a>
+                    {" ] "}
+                  </>
+                )
+              ) : (
+                <></>
+              )}
+            </p>
+          );
+          break;
+        }
+
+        case "adjustment": {
+          const adjustment = item.data as BalanceAdjustment;
+          logEls.push(
+            <p key={`adjustment-${adjustment.id}`}>
+              [{prettifyUnixTime(adjustment.timestamp)}]{" "}
+              <b>{adjustment.adjuster}</b> adjusted <b>{adjustment.adjusted}</b>
+              &apos;s balance from {adjustment.balanceFrom} ➡{" "}
+              {adjustment.balanceTo}
+            </p>
+          );
+          break;
+        }
+
+        default:
+          break;
+      }
+    });
+
+    return logEls;
+  }
+  function generateChargeLogEls(chargeList: Array<Charge>) {
+    const logEls: Array<React.JSX.Element> = [];
+
+    // sort charges by timestamp
+    chargeList.sort((a, b) => a.timestamp - b.timestamp);
+
+    // iterate through charges and create elements for them
+    chargeList.forEach((charge) => {
       logEls.push(
-        <p key={payment.id}>
-          [{prettifyUnixTime(payment.timestamp)}]{" "}
-          {payment.processed ? (
-            <a title="Processed">(✅)</a>
-          ) : (
-            <a title="Pending processing">(⏳)</a>
-          )}
-          {payment.approved ? (
-            <></>
-          ) : (
-            <a title="Awaiting admin approval">(📬)</a>
-          )}{" "}
-          {payment.member} sent a payment of ${payment.amount}
-          {isAdmin ? (
-            payment.approved ? (
-              <></>
-            ) : (
-              <>
-                {" - [ "}
-                <a
-                  className="approve_deny_buttons"
-                  onClick={approvePayment}
-                  data-payment-id={payment.id}
-                >
-                  approve
-                </a>
-                {" / "}
-                <a
-                  className="approve_deny_buttons"
-                  onClick={disprovePayment}
-                  data-payment-id={payment.id}
-                >
-                  deny
-                </a>
-                {" ] "}
-              </>
-            )
-          ) : (
-            <></>
-          )}
+        <p key={charge.id}>
+          [{prettifyUnixTime(charge.timestamp)}] Family charged for $
+          {charge.amount}
         </p>
       );
     });
@@ -465,9 +544,9 @@ export default function FamilyOverview({
         <h2>Members ({Object.keys(family.members).length}/6)</h2>
         <div className="member_list">{generateMemberEls(family.members)}</div>
       </div>
-      <div className="payment_log_container">
+      <div className="transaction_log_container">
         <span>
-          <h2>Payments</h2>
+          <h2>Transactions</h2>
           {me.name === "null" && me.passcode === "" ? (
             <></>
           ) : (
@@ -476,12 +555,12 @@ export default function FamilyOverview({
                 setDisplayAddPaymentModal(!displayAddPaymentModal);
               }}
             >
-              Add <FontAwesomeIcon icon={faAdd} />
+              Add a payment <FontAwesomeIcon icon={faAdd} />
             </button>
           )}
         </span>
-        <div className="payment_log">
-          <p className="payment_log_key">
+        <div className="transcations_log">
+          <p className="transactions_log_key">
             <i>
               📬 = Payment is awaiting admin approval
               <br />⏳ = Payment is awaiting processing
@@ -491,9 +570,22 @@ export default function FamilyOverview({
             </i>
           </p>
           <hr />
-          {generatePaymentLogEls(family.payments)}
+          {generateTransactionLogEls(
+            family.payments,
+            family.charges,
+            family.adjustments
+          )}
         </div>
       </div>
+      {/* <div className="charge_log_container">
+        <span>
+          <h2>Charges</h2>
+        </span>
+        <div className="charge_log">
+          <hr />
+          {generateChargeLogEls(family.charges)}
+        </div>
+      </div> */}
     </div>
   );
 }

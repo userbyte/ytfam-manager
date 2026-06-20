@@ -20,7 +20,7 @@
 
 .main div[class="family_info_container"],
 .main div[class="member_list_container"],
-.main div[class="payment_log_container"] {
+.main div[class="transaction_log_container"] {
   padding: 0.5em;
   padding-top: 0;
   border: 2px solid var(--element-foreground);
@@ -44,26 +44,26 @@
   height: 50%;
 }
 
-.main div[class="payment_log_container"] {
+.main div[class="transaction_log_container"] {
   grid-area: transactions;
 }
-.main div[class="payment_log"] {
+.main div[class="transaction_log"] {
   overflow-y: scroll;
 }
 
-.main div[class="payment_log_container"] p[class="payment_log_key"] {
+.main div[class="transaction_log_container"] p[class="transaction_log_key"] {
   padding: 0;
   margin-top: -0.2em;
 }
 
-.main div[class="payment_log_container"] span {
+.main div[class="transaction_log_container"] span {
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 20px;
 }
 
-.main div[class="payment_log_container"] button {
+.main div[class="transaction_log_container"] button {
   font-size: 1em;
   height: fit-content;
 }

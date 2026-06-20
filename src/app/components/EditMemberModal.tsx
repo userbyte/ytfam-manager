@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSave } from "@fortawesome/free-solid-svg-icons";
-import { Family, Member } from "../models/db";
+import { BalanceAdjustment, Family, Member } from "../models/db";
 import styles from "@/app/style/module/EditMemberModal.module.css";
 
 export default function EditMemberModal({
@@ -109,6 +109,12 @@ export default function EditMemberModal({
       // update local family data to reflect change
       setFamily((prevFamily) => {
         const updated_members = [...prevFamily.members];
+        const adjustment: BalanceAdjustment = resp_json.balanceAdjustment;
+        // only add adjustment if its not undefined
+        const updated_adjustments =
+          adjustment != undefined
+            ? [...prevFamily.adjustments, adjustment]
+            : [...prevFamily.adjustments];
 
         // find the member
         const memberIndex = updated_members.findIndex(
@@ -120,16 +126,20 @@ export default function EditMemberModal({
         return {
           ...prevFamily,
           members: updated_members,
+          adjustments: updated_adjustments,
         };
       });
 
       // close modal
       setDisplayEditMemberModal((cur) => !cur);
     } else {
-      console.error(resp_json.error);
       if (resp.status === 403) {
         toast.error("Only family admins can edit members");
       } else {
+        if (resp_json.error) {
+          toast.error(resp_json.error);
+          return;
+        }
         toast.error("Error editing member");
       }
     }
