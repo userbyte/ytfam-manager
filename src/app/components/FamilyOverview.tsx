@@ -94,7 +94,7 @@ export default function FamilyOverview({
                 <FontAwesomeIcon icon={faUserShield} />
               ) : (
                 <FontAwesomeIcon icon={faUser} />
-              )}{" "}
+              )}
               {member.name} {member.name === me.name ? "(you)" : <></>}
             </h3>
             <p>Balance: {member.balance}</p>
