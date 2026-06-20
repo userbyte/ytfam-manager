@@ -544,8 +544,8 @@ export default function FamilyOverview({
             </button>
           )}
         </span>
-        <div className="transcations_log">
-          <p className="transactions_log_key">
+        <div className="transaction_log">
+          <p className="transaction_log_key">
             <i>
               📬 = Payment is awaiting admin approval
               <br />⏳ = Payment is awaiting processing
