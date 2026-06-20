@@ -33,7 +33,7 @@ export default function AddPaymentModal({
     selectionEls.push(
       <option key={member.name} value={member.name}>
         {member.name}
-      </option>,
+      </option>
     );
   });
 
@@ -66,9 +66,11 @@ export default function AddPaymentModal({
     if (isAdmin) {
       member = memberSelectRef.current.value;
     }
+    // get local timezone offset
+    const tzoffset = new Date().getTimezoneOffset();
 
     const newPayment = {
-      timestamp: datetimeInputRef.current.valueAsNumber / 1000,
+      timestamp: datetimeInputRef.current.valueAsNumber / 1000 + tzoffset * 60,
       member: member,
       amount: amountInputRef.current.valueAsNumber,
     };
@@ -94,12 +96,12 @@ export default function AddPaymentModal({
       });
 
       // close modal
-      setDisplayAddPaymentModal((cur) => !cur);
+      setDisplayAddPaymentModal(false);
     } else {
       console.error(resp_json.error);
       if (resp.status === 403) {
         toast.error(
-          `You can only add a payment with member of "${me.name}" (permission error)`,
+          `You can only add a payment with member of "${me.name}" (permission error)`
         );
       } else {
         toast.error("Error adding payment");
