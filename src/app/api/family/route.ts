@@ -74,6 +74,7 @@ export async function POST(request: Request) {
       rounding: body_json.rounding,
       payments: [],
       charges: [],
+      adjustments: [],
     };
 
     if (body_json.initial_charge === "true") {
@@ -119,6 +120,8 @@ export async function POST(request: Request) {
         id: family_generated.charges.length + 1,
         timestamp: unixTimestampNow(),
         amount: family_generated.price,
+        memberCount: family_generated.members.length,
+        memberCost: cost_per_member,
       };
       family_generated.charges = [...family_generated.charges, newCharge];
 

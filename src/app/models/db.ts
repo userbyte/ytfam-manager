@@ -19,7 +19,12 @@ export type Payment = {
 export type Charge = {
   id: number;
   timestamp: number;
+  /** Total charge amount */
   amount: number;
+  /** Member count as of this charge */
+  memberCount: number;
+  /** Calculated cost per member */
+  memberCost: number;
 };
 
 export type Family = {

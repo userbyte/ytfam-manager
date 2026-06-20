@@ -82,6 +82,8 @@ export async function GET(req: Request) {
           id: updated_family.charges.length + 1,
           timestamp: unixTimestampNow(),
           amount: family.price,
+          memberCount: family.members.length,
+          memberCost: cost_per_member,
         };
         updated_family.charges = [...updated_family.charges, newCharge];
 
