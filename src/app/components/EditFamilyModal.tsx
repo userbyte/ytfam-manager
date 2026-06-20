@@ -23,6 +23,7 @@ export default function EditFamilyModal({
 
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const priceInputRef = useRef<HTMLInputElement | null>(null);
+  const roundingSelectRef = useRef<HTMLSelectElement | null>(null);
 
   // return empty if not admin, or if targetFamily is unset
   if (!isAdmin || !family) {
@@ -35,7 +36,11 @@ export default function EditFamilyModal({
       return;
     }
     // check input refs
-    if (!nameInputRef.current || !priceInputRef.current) {
+    if (
+      !nameInputRef.current ||
+      !priceInputRef.current ||
+      !roundingSelectRef.current
+    ) {
       console.error("submitFamilyEdit(): one or more input refs are null");
       return;
     }
@@ -44,6 +49,7 @@ export default function EditFamilyModal({
     const familyUpd: {
       name?: string;
       price?: number;
+      rounding?: string;
     } = {};
     // validate inputs
     // add all non-empty inputs to the ediff object
@@ -52,6 +58,12 @@ export default function EditFamilyModal({
     }
     if (priceInputRef.current.value != "") {
       familyUpd.price = priceInputRef.current.valueAsNumber;
+    }
+    if (
+      roundingSelectRef.current.value != "" &&
+      roundingSelectRef.current.value != family.rounding
+    ) {
+      familyUpd.rounding = roundingSelectRef.current.value;
     }
 
     // check if ediff is empty
@@ -128,7 +140,7 @@ export default function EditFamilyModal({
           e.stopPropagation();
         }}
       >
-        <p className="title_text">Edit family</p>
+        <h2 className="title_text">Edit family</h2>
         <hr />
         <label>Name</label>
         <input type="text" placeholder={family.name} ref={nameInputRef} />
@@ -138,6 +150,21 @@ export default function EditFamilyModal({
           placeholder={String(family.price)}
           ref={priceInputRef}
         />
+        <label>Rounding</label>
+        <select ref={roundingSelectRef} defaultValue={family.rounding}>
+          <option value={"up"}>
+            Round up (${family.price / family.members.length} ➡ $
+            {Math.round(family.price / family.members.length)})
+          </option>
+          <option value={"down"}>
+            Round down (${family.price / family.members.length} ➡ $
+            {Math.floor(family.price / family.members.length)})
+          </option>
+          <option value={"none"}>
+            No rounding (${family.price} ➡ $
+            {family.price / family.members.length})
+          </option>
+        </select>
         <span>
           <button className="save_button" onClick={submitFamilyEdit}>
             Save <FontAwesomeIcon icon={faSave} />
