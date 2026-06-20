@@ -33,7 +33,7 @@ export default function AddPaymentModal({
     selectionEls.push(
       <option key={member.name} value={member.name}>
         {member.name}
-      </option>
+      </option>,
     );
   });
 
@@ -99,12 +99,24 @@ export default function AddPaymentModal({
       console.error(resp_json.error);
       if (resp.status === 403) {
         toast.error(
-          `You can only add a payment with member of "${me.name}" (permission error)`
+          `You can only add a payment with member of "${me.name}" (permission error)`,
         );
       } else {
         toast.error("Error adding payment");
       }
     }
+  }
+
+  function formatLocalDateTime(date: Date): string {
+    const pad = (n: number) => n.toString().padStart(2, "0");
+
+    const Y = date.getFullYear();
+    const M = pad(date.getMonth() + 1);
+    const D = pad(date.getDate());
+    const h = pad(date.getHours());
+    const m = pad(date.getMinutes());
+
+    return `${Y}-${M}-${D}T${h}:${m}`;
   }
 
   return (
@@ -125,7 +137,7 @@ export default function AddPaymentModal({
         <label>Date + time</label>
         <input
           type="datetime-local"
-          defaultValue={new Date().toISOString().slice(0, 16)}
+          defaultValue={formatLocalDateTime(new Date())}
           ref={datetimeInputRef}
         />
         {isAdmin ? (
