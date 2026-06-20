@@ -75,4 +75,6 @@ export type FamilyStripped = {
   price: number;
   members: Array<MemberStripped>;
   payments: Array<Payment>;
+  charges: Array<Charge>;
+  adjustments: Array<BalanceAdjustment>;
 };

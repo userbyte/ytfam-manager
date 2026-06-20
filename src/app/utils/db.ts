@@ -123,6 +123,8 @@ export async function getFamily({
         price: family_.price,
         members: members_,
         payments: family_.payments,
+        charges: family_.charges,
+        adjustments: family_.adjustments,
       };
 
       if (force_nostrip) {
