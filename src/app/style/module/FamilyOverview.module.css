@@ -176,6 +176,23 @@
   padding: 1em;
 }
 
+/* --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- */
+/*                              responsive shit                                */
+/* ---                                                                     --- */
+@media only screen and (max-width: 1244px) {
+  .main {
+    display: flex;
+
+    flex-direction: column;
+    gap: 1em;
+    width: 75%;
+    grid-template-columns: unset;
+    grid-template-rows: unset;
+    grid-template-areas: unset;
+    font-size: 1.5vw;
+  }
+}
+
 @media only screen and (max-width: 1000px) {
   .main {
     display: flex;
