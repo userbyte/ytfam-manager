@@ -76,7 +76,7 @@ export async function POST(request: Request) {
       charges: [],
     };
 
-    if (String(body_json.initialCharge) === "true") {
+    if (body_json.initial_charge === "true") {
       // add an initial charge, used when you're starting a new plan and nobody has paid yet
 
       const updated_family: Family = Object(family_generated);
