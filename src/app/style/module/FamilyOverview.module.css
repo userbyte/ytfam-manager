@@ -47,7 +47,9 @@
 .main div[class="transaction_log_container"] {
   grid-area: transactions;
 }
+
 .main div[class="transaction_log"] {
+  max-height: 52em;
   overflow-y: scroll;
 }
 
