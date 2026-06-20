@@ -50,6 +50,7 @@ export default function EditMemberModal({
 
     // validate inputs
     const memberUpd: {
+      [key: string]: string | number | boolean | undefined;
       name?: string;
       balance?: number;
       passcode?: string;
@@ -69,6 +70,13 @@ export default function EditMemberModal({
       memberUpd.admin = adminStatusInputRef.current.checked;
     }
 
+    // check if ediff has identical values to current targetMember
+    for (const [key, value] of Object.entries(targetMember)) {
+      if (targetMember[key] === memberUpd[key]) {
+        // disregard edit, values are identical
+        delete memberUpd[key];
+      }
+    }
     // check if ediff is empty
     if (Object.entries(memberUpd).length === 0) {
       console.log("submitMemberEdit(): no edits to apply");
