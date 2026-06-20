@@ -197,6 +197,7 @@ export async function PATCH(request: Request) {
   let familyUpd: {
     name?: string;
     price?: number;
+    rounding?: string;
   };
   if (!body_json.full_code || !body_json.ediff) {
     return new Response(
@@ -219,7 +220,7 @@ export async function PATCH(request: Request) {
     return new Response(
       JSON.stringify({
         status: "failed",
-        error: "Only admins can modify members",
+        error: "Only admins can modify the family",
       }),
       {
         status: 403,
@@ -261,7 +262,7 @@ export async function PATCH(request: Request) {
       return new Response(
         JSON.stringify({
           status: "success",
-          // member: updated_family.members[memberIndex],
+          family: updated_family,
         }),
         {
           status: 200,
