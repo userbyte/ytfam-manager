@@ -290,24 +290,6 @@ export default function FamilyOverview({
 
     return logEls;
   }
-  function generateChargeLogEls(chargeList: Array<Charge>) {
-    const logEls: Array<React.JSX.Element> = [];
-
-    // sort charges by timestamp
-    chargeList.sort((a, b) => a.timestamp - b.timestamp);
-
-    // iterate through charges and create elements for them
-    chargeList.forEach((charge) => {
-      logEls.push(
-        <p key={charge.id}>
-          [{prettifyUnixTime(charge.timestamp)}] Family charged for $
-          {charge.amount}
-        </p>
-      );
-    });
-
-    return logEls;
-  }
 
   function approvePayment(e: MouseEvent<HTMLAnchorElement>) {
     if (e.currentTarget) {

@@ -72,7 +72,7 @@ export default function EditMemberModal({
 
     // check if ediff has identical values to current targetMember
     for (const [key, value] of Object.entries(targetMember)) {
-      if (targetMember[key] === memberUpd[key]) {
+      if (value === memberUpd[key]) {
         // disregard edit, values are identical
         delete memberUpd[key];
       }
