@@ -35,6 +35,7 @@ export type Family = {
   plan_start: number;
   next_renewal: number;
   price: number;
+  rounding: "up" | "down" | "none";
   members: Array<Member>;
   payments: Array<Payment>;
   charges: Array<Charge>;

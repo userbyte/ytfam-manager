@@ -73,6 +73,7 @@ export default function FamilyOverview({
     plan_start: 0,
     next_renewal: 0,
     price: 0,
+    rounding: "none",
     members: [],
     payments: [],
     charges: [],

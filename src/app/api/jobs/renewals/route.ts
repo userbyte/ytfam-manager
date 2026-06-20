@@ -44,7 +44,26 @@ export async function GET(req: Request) {
       }
 
       const updated_family: Family = Object(family);
-      const cost_per_member = Math.round(family.price / family.members.length);
+      let cost_per_member = family.price / family.members.length;
+      // we round to the nearest tenth by default
+      cost_per_member = Math.round(cost_per_member * 10) / 10;
+      switch (updated_family.rounding) {
+        case "up":
+          // round up to the nearest dollar
+          cost_per_member = Math.round(family.price / family.members.length);
+          break;
+        case "down":
+          // round down to the nearest dollar
+          cost_per_member = Math.floor(family.price / family.members.length);
+          break;
+        case "none":
+          // rounding is disabled
+          break;
+
+        default:
+          // rounding is disabled
+          break;
+      }
 
       while (updated_family.next_renewal < unixTimestampNow()) {
         // catch up to the modern day in the case of plan start date being a really long time ago
