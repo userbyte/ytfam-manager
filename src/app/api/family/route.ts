@@ -3,9 +3,9 @@
 // Supported methods: POST, PATCH, DELETE
 
 import db from "@/app/drivers/db";
-import { Family, Member } from "@/app/models/db";
+import { Charge, Family, Member } from "@/app/models/db";
 import { getFamily, isAdminCode } from "@/app/utils/db";
-import { generateRandomString } from "@/app/utils/shared";
+import { generateRandomString, unixTimestampNow } from "@/app/utils/shared";
 
 // POST /api/family
 // creates a new family
@@ -17,7 +17,9 @@ export async function POST(request: Request) {
       !body_json.name ||
       !body_json.plan_start ||
       !body_json.price ||
-      !body_json.members
+      !body_json.members ||
+      !body_json.rounding ||
+      !body_json.initial_charge
     ) {
       throw new Error("Invalid request");
     }
@@ -35,7 +37,7 @@ export async function POST(request: Request) {
       members: body_json.members,
     };
 
-    console.log("creating family:", body_json.name);
+    console.log(`creating family: ${body_json.name}`);
 
     // full family object to be put in the database
     const name: string = family_initial.name;
@@ -69,14 +71,65 @@ export async function POST(request: Request) {
       next_renewal: next_renewal,
       price: price,
       members: members,
+      rounding: body_json.rounding,
       payments: [],
       charges: [],
     };
 
+    if (String(body_json.initialCharge) === "true") {
+      // add an initial charge, used when you're starting a new plan and nobody has paid yet
+
+      const updated_family: Family = Object(family_generated);
+      let cost_per_member =
+        family_generated.price / family_generated.members.length;
+      // we round to the nearest tenth by default
+      cost_per_member = Math.round(cost_per_member * 10) / 10;
+      switch (updated_family.rounding) {
+        case "up":
+          // round up to the nearest dollar
+          cost_per_member = Math.round(
+            family_generated.price / family_generated.members.length
+          );
+          break;
+        case "down":
+          // round down to the nearest dollar
+          cost_per_member = Math.floor(
+            family_generated.price / family_generated.members.length
+          );
+          break;
+        case "none":
+          // rounding is disabled
+          break;
+
+        default:
+          // rounding is disabled
+          break;
+      }
+
+      // iterate through family members
+      let index: number = 0;
+      family_generated.members.forEach(() => {
+        // add to the members balance
+        family_generated.members[index].balance += cost_per_member;
+        index += 1;
+      });
+
+      // add a charge
+      const newCharge: Charge = {
+        id: family_generated.charges.length + 1,
+        timestamp: unixTimestampNow(),
+        amount: family_generated.price,
+      };
+      family_generated.charges = [...family_generated.charges, newCharge];
+
+      console.log(
+        `an initial charge for family "${family_generated.name}" (${family_generated.family_code}) has been added`
+      );
+    }
+
     // insert new family into the database
     if (db) {
-      const coll = db.collection("family");
-      coll.insertOne(family_generated);
+      await db.collection("family").insertOne(family_generated);
     } else {
       return new Response(
         JSON.stringify({ status: "failed", error: "Database error" }),
@@ -85,6 +138,9 @@ export async function POST(request: Request) {
         }
       );
     }
+    console.log(
+      `new family created: "${family_generated.name}" (${family_generated.family_code}) with ${family_generated.members.length} members`
+    );
 
     // return new family
     return new Response(
