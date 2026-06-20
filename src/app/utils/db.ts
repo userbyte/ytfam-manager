@@ -47,6 +47,7 @@ export async function getFamily({
         plan_start: family.plan_start,
         next_renewal: family.next_renewal,
         price: family.price,
+        rounding: family.rounding,
         members: family.members,
         payments: family.payments,
         charges: family.charges,

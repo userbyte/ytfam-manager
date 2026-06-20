@@ -389,8 +389,16 @@ export default function NewFamilyDialog() {
         className="page"
         style={{ display: pageNumber === 4 ? "flex" : "none" }}
       >
-        <label>Cost rounding</label>
-        <p className="desc_text">What should everyone be charged?</p>
+        <p className="desc_text">
+          📞 💸
+          <br />
+          The money calling. Here&apos;s some options to determine how you want
+          automated charges to be applied.
+        </p>
+        <div>
+          <label>Cost rounding</label>
+          <p className="desc_text">What should everyone be charged?</p>
+        </div>
         <select onChange={(e) => setRounding(e.currentTarget.value)}>
           <option value={"up"}>
             Round up (${renewalCost / planMembers.length} ➡ $
@@ -444,8 +452,8 @@ export default function NewFamilyDialog() {
       >
         <h3>Summary</h3>
         <p className="desc_text">
-          Final step! Double check everything here, then hit create when you're
-          ready!
+          Final step! Double check everything here, then hit create when
+          you&apos;re ready!
         </p>
         <div>
           <label>Family name</label>
